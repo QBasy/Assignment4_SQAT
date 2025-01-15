@@ -7,12 +7,31 @@ import (
 
 // AviataHomePage defines the structure for Aviata's home page.
 type AviataHomePage struct {
-	driver selenium.WebDriver
+	driver        selenium.WebDriver
+	datePicker    selenium.WebElement
+	toCityInput   selenium.WebElement
+	fromCityInput selenium.WebElement
+	searchButton  selenium.WebElement
 }
 
 // NewAviataHomePage initializes a new instance of AviataHomePage.
-func NewAviataHomePage(driver selenium.WebDriver) *AviataHomePage {
-	return &AviataHomePage{driver: driver}
+func NewAviataHomePage(driver selenium.WebDriver) (*AviataHomePage, error) {
+	var err error
+	aviataHomePage := &AviataHomePage{driver: driver}
+	if aviataHomePage.fromCityInput, err = driver.FindElement(selenium.ByXPATH, "//div[contains(@class, 'search')]//input[1]"); err != nil {
+		return nil, err
+	}
+	if aviataHomePage.toCityInput, err = driver.FindElement(selenium.ByXPATH, `//*[@id="search-route-0"]/div[3]/label/input`); err != nil {
+		return nil, err
+	}
+	if aviataHomePage.datePicker, err = driver.FindElement(selenium.ByCSSSelector, ".date-picker-class"); err != nil {
+		return nil, err
+	}
+	if aviataHomePage.searchButton, err = driver.FindElement(selenium.ByCSSSelector, "button[type='submit']"); err != nil {
+		return nil, err
+	}
+
+	return aviataHomePage, nil
 }
 
 // NavigateToHome navigates to the Aviata home page.
@@ -67,7 +86,6 @@ func (p *AviataHomePage) SetToCity(city string) error {
 	}
 	time.Sleep(2 * time.Second)
 
-	// Adjust city option selector as necessary
 	cityOption, err := p.driver.FindElement(selenium.ByXPATH, `//*[@id="search-route-0"]/div[3]/div[2]/div/ul/li[1]/div/div`)
 	if err != nil {
 		return err
